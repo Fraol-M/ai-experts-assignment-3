@@ -20,13 +20,11 @@ Subsequently, the header-setting block (`if isinstance(self.oauth2_token, OAuth2
 
 ## What is the Fix?
 
-The fix adds a defensive check to the refresh condition:
+The fix simplifies and hardens the refresh condition to:
 
 ```python
-if not self.oauth2_token or not isinstance(self.oauth2_token, OAuth2Token) or (
-    isinstance(self.oauth2_token, OAuth2Token) and self.oauth2_token.expired
-):
+if not isinstance(self.oauth2_token, OAuth2Token) or self.oauth2_token.expired:
 ```
 
-This ensures that **any** token value that isn't a valid `OAuth2Token` instance (whether it's a `dict`, `None`, or some other incorrect type) will trigger a refresh. When the token is a dict (as in the bug case), `not isinstance(..., OAuth2Token)` is `True`, so `refresh_oauth2()` is called, replacing the invalid token with a valid one. The subsequent header-setting logic then works correctly.
+This works because of short-circuit evaluation. If the token is `None` or a `dict`, the first part is `True`, so Python does not evaluate `.expired` on an invalid type and refresh is triggered immediately. If the token is a real `OAuth2Token`, the first part is `False`, then `.expired` is checked safely. This guarantees invalid token types are refreshed and valid-but-expired tokens are refreshed too.
 
