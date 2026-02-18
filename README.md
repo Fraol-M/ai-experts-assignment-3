@@ -1,6 +1,11 @@
 # Running tests for this project
 
 ## Run tests locally
+**Set up a virtual environment (optional but recommended):**
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\Activate
+   ```
 
 Install dependencies:
 
